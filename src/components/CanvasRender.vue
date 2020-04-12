@@ -10,51 +10,6 @@
 
 <script>
 export default {
-  props: {
-    layer: {
-      type: Object,
-      default() {
-        return {
-          type: "text",
-          elem: {
-            value: "祥祥真棒",
-            opacity: 1,
-            fontFamily: "serif",
-            fontSize: 30,
-            align: "center",
-            lineHeight: 30,
-            width: 300,
-            height: 200,
-            top: 20,
-            left: 20,
-            shadow: {
-              // 文字阴影
-              rotate: 142,
-              color: {
-                r: 61,
-                g: 0,
-                b: 11
-              },
-              blur: 0,
-              offset: 3,
-              opacity: 0.35
-            },
-            color: "red",
-            isArtText: true,
-            artTextOption: {
-              gradient: {
-                rotate: -47,
-                colors: {
-                  "0": "#B9F1FF",
-                  "100": "#405FFF"
-                }
-              }
-            }
-          }
-        };
-      }
-    }
-  },
   data() {
     return {
       canvasItemStyle: {
@@ -71,6 +26,44 @@ export default {
         width: 0,
         height: 0
       },
+      layer: {
+        type: "text",
+        elem: {
+          value: "祥祥真棒",
+          opacity: 1,
+          fontFamily: "serif",
+          fontSize: 30,
+          align: "center",
+          lineHeight: 36,
+          width: 300,
+          height: 36,
+          top: 20,
+          left: 20,
+          shadow: {
+            // 文字阴影
+            rotate: 142,
+            color: {
+              r: 61,
+              g: 0,
+              b: 11
+            },
+            blur: 0,
+            offset: 3,
+            opacity: 0.35
+          },
+          color: "red",
+          isArtText: true,
+          artTextOption: {
+            gradient: {
+              rotate: -47,
+              colors: {
+                "0": "#B9F1FF",
+                "100": "#405FFF"
+              }
+            }
+          }
+        }
+      },
       ctx: null
     };
   },
@@ -81,7 +74,12 @@ export default {
   },
   watch: {
     "layer.elem.value"(val) {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.clearRect(0, 0, this.layer.elem.width, this.layer.elem.height);
+      this.renderCanvas();
+    },
+    "layer.elem.height"(val) {
+      this.setCanvasSize()
+      // this.ctx.clearRect(0, 0, this.layer.elem.width, this.layer.elem.height);
       this.renderCanvas();
     }
   },
@@ -95,6 +93,8 @@ export default {
         top: `${top}px`,
         left: `${left}px`
       };
+      this.canvas.width = width;
+      this.canvas.height = height;
       this.canvasStyle = {
         ...this.canvasStyle,
         width: `${width}px`,
@@ -103,6 +103,7 @@ export default {
     },
     renderCanvas() {
       const ctx = this.canvas.getContext("2d");
+      this.ctx = ctx;
       ctx.font = `${this.layer.elem.fontSize}px ${this.layer.elem.fontFamily}`;
       ctx.textBaseline = "top";
       ctx.fillStyle = this.layer.elem.color;
@@ -135,7 +136,7 @@ export default {
         ctx.shadowOffsetY = y;
         ctx.shadowBlur = blur;
       }
-      ctx.wrapText(
+      this.wrapText(
         this.layer.elem.value,
         0,
         0,
@@ -143,9 +144,8 @@ export default {
         this.layer.elem.lineHeight,
         this
       );
-      this.ctx = ctx;
     },
-    wrapText(x, y, maxWidth, lineHeight) {
+    wrapText(text, x, y, maxWidth, lineHeight) {
       if (
         typeof text != "string" ||
         typeof x != "number" ||
@@ -173,10 +173,9 @@ export default {
           this.ctx.fillText(line, x, y);
           line = arrText[n];
           y += lineHeight;
-          if (y > canvas.height) {
-            this.canvas.height = y;
-            this.canvas.style.height = `${y}px`;
-            this.ctx.renderCanvas();
+          if (y >= this.canvas.height) {
+            y += lineHeight;
+            this.layer.elem.height = y;
             return;
           }
         } else {
@@ -189,6 +188,7 @@ export default {
   mounted() {
     this.setCanvasSize();
     this.renderCanvas();
+    window._this = this;
   }
 };
 </script>

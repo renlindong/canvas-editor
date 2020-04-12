@@ -1,9 +1,9 @@
 <template>
   <div class="home">
-    <div class="canvas-container">
-      <canvas-editor></canvas-editor>
+    <div class="canvas-container" @click="handleContainerClick">
+      <canvas-editor v-if="showEditor" :current-canvas="currentCanvas"></canvas-editor>
       <div class="render-container">
-        <canvas-render @click.native="handleShowEditor" data-canvas-id="1" :layer="layer"></canvas-render>
+        <canvas-render ref="canvas1" @click.native.stop="handleShowEditor" data-canvas-id="canvas1" :layer="layer"></canvas-render>
       </div>
     </div>
     <!-- <div class="edit-container" @click="handleClick">
@@ -48,9 +48,9 @@ export default {
           fontFamily: "serif",
           fontSize: 30,
           align: "center",
-          lineHeight: 30,
+          lineHeight: 40,
           width: 300,
-          height: 200,
+          height: 40,
           top: 20,
           left: 20,
           shadow: {
@@ -78,7 +78,8 @@ export default {
           }
         }
       },
-      showEditor: false
+      showEditor: false,
+      currentCanvas: ""
     };
   },
   methods: {
@@ -106,10 +107,14 @@ export default {
       input.value = this.layer.elem.value;
       input.focus();
     },
-    handleShowEditor(event) {
-      const { offsetTop, offsetLeft } = event.currentTarget;
-      const { canvasId } = event.dataset;
+    handleShowEditor(event, vm) {
+      // 处理编辑器的位置
+      const { dataset } = event.currentTarget;
       this.showEditor = true;
+      this.currentCanvas = this.$refs[dataset.canvasId];
+    },
+    handleContainerClick() {
+      // this.showEditor = false;
     }
   }
 };
