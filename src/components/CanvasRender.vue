@@ -10,6 +10,12 @@
 
 <script>
 export default {
+  props: {
+    layer: {
+      type: Object,
+      default: null
+    }
+  },
   data() {
     return {
       canvasItemStyle: {
@@ -25,44 +31,6 @@ export default {
         left: 0,
         width: 0,
         height: 0
-      },
-      layer: {
-        type: "text",
-        elem: {
-          value: "祥祥真棒",
-          opacity: 1,
-          fontFamily: "serif",
-          fontSize: 30,
-          align: "center",
-          lineHeight: 36,
-          width: 300,
-          height: 36,
-          top: 20,
-          left: 20,
-          shadow: {
-            // 文字阴影
-            rotate: 142,
-            color: {
-              r: 61,
-              g: 0,
-              b: 11
-            },
-            blur: 0,
-            offset: 3,
-            opacity: 0.35
-          },
-          color: "red",
-          isArtText: true,
-          artTextOption: {
-            gradient: {
-              rotate: -47,
-              colors: {
-                "0": "#B9F1FF",
-                "100": "#405FFF"
-              }
-            }
-          }
-        }
       },
       ctx: null
     };
