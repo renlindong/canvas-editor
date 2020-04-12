@@ -6,24 +6,6 @@
         <canvas-render ref="canvas1" @click.native.stop="handleShowEditor" data-canvas-id="canvas1" :layer="layer"></canvas-render>
       </div>
     </div>
-    <!-- <div class="edit-container" @click="handleClick">
-      <div
-        :class="['canvas-container', canvasId === 1 ? 'canvas-container--select' : '']"
-        @dblclick="handleDoubleClick(1)"
-        @click.stop="handleSelectPosition">
-        <div class="cursor">|</div>
-        <div v-if="mask" class="mask"></div>
-        <canvas id="canvas"></canvas>
-      </div>
-      <textarea
-        id="edit-input"
-        type="text"
-        @input="handleInput"
-        @keydown.up="handleKeyUp"
-        @keydown.down="handleKeyDown"
-        @keydown.left="handleKeyLeft"
-        @keydown.right="handleKeyRight">
-    </textarea>-->
   </div>
 </template>
 
