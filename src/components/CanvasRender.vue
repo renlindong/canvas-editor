@@ -53,13 +53,13 @@ export default {
   },
   methods: {
     setCanvasSize() {
-      const { top, left, width, height } = this.layer.elem;
+      const { x, y, width, height } = this.layer;
       this.canvasItemStyle = {
         ...this.canvasItemStyle,
         width: `${width}px`,
         height: `${height}px`,
-        top: `${top}px`,
-        left: `${left}px`
+        top: `${y}px`,
+        left: `${x}px`
       };
       this.canvas.width = width;
       this.canvas.height = height;
@@ -72,48 +72,56 @@ export default {
     renderCanvas() {
       const ctx = this.canvas.getContext("2d");
       this.ctx = ctx;
-      ctx.font = `${this.layer.elem.fontSize}px ${this.layer.elem.fontFamily}`;
-      ctx.textBaseline = "top";
-      ctx.fillStyle = this.layer.elem.color;
 
-      if (this.layer.elem.artTextOption.gradient) {
-        // TODO：角度换坐标
+      // 字体、字号
+      ctx.font = `${this.layer.textData.fontSize}px ${this.layer.textData.fontFamily}`;
+      ctx.textBaseline = "top";
+      // 字体颜色
+      ctx.fillStyle = this.layer.textData.color;
+
+      if (this.layer.textData.artTextOption.gradient) {
+        // 线性渐变
+        const { width, height } = this.canvas;
+        const { angle, colors } = this.layer.textData.artTextOption.gradient;
+        // 渲染位置计算
         const gradient = ctx.createLinearGradient(
-          0,
-          0,
-          this.canvas.width,
-          this.canvas.height
+          width / 2,
+          height,
+          width / 2,
+          0
         );
-        const gradientConfig = this.layer.elem.artTextOption.gradient;
-        Object.keys(gradientConfig.colors)
-          .sort((o1, o2) => {
-            o1 - o2;
-          })
-          .forEach(key => {
-            gradient.addColorStop(key / 100, gradientConfig.colors[key]);
-          });
+        colors.forEach(item => {
+          gradient.addColorStop(item.location, item.color);
+        });
         ctx.fillStyle = gradient;
       }
-      if (this.layer.elem.shadow) {
-        const { rotate, color, blur, offset, opacity } = this.layer.elem.shadow;
+
+      if (this.layer.textData.artTextOption.shadow) {
+        // 应该放在canvas外吗？drop-shadow？
+        /* const { rotate, color, blur, offset, opacity } = this.layer.textData.artTextOption.shadow;
         const { r, g, b } = color;
         const x = Math.cos((180 - rotate) / 180 * Math.PI) * offset;
         const y = Math.sin((180 - rotate) / 180 * Math.PI) * offset;
         ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         ctx.shadowOffsetX = x;
         ctx.shadowOffsetY = y;
-        ctx.shadowBlur = blur;
+        ctx.shadowBlur = blur; */
+      }
+
+      if (this.layer.textData.artTextOption.stroke) {
+        const { opacity, size, color } = this.layer.textData.artTextOption.stroke;
+        ctx.strokeStyle = color;
       }
       this.wrapText(
-        this.layer.elem.value,
+        this.layer.textData.value,
         0,
         0,
         this.canvas.width,
-        this.layer.elem.lineHeight,
-        this
+        this.layer.textData.lineHeight
       );
     },
     wrapText(text, x, y, maxWidth, lineHeight) {
+      // 文字对齐方式
       if (
         typeof text != "string" ||
         typeof x != "number" ||
@@ -127,9 +135,12 @@ export default {
       }
       if (typeof lineHeight == "undefined") {
         lineHeight =
-          (canvas && parseInt(window.getComputedStyle(canvas).lineHeight)) ||
+          (this.canvas && parseInt(window.getComputedStyle(this.canvas).lineHeight)) ||
           parseInt(window.getComputedStyle(document.body).lineHeight);
       }
+
+      const { opacity, size, color } = this.layer.textData.artTextOption.stroke;
+      this.ctx.lineWidth = 1 + size;
       // 字符分隔为数组
       var arrText = text.split("");
       var line = "";
@@ -138,6 +149,7 @@ export default {
         var metrics = this.ctx.measureText(testLine);
         var testWidth = metrics.width;
         if (testWidth > maxWidth && n > 0) {
+          this.ctx.strokeText(line, x, y);
           this.ctx.fillText(line, x, y);
           line = arrText[n];
           y += lineHeight;
@@ -150,6 +162,9 @@ export default {
           line = testLine;
         }
       }
+      this.ctx.strokeStyle = color;
+      this.ctx.strokeText(line, x, y);
+
       this.ctx.fillText(line, x, y);
     }
   },
